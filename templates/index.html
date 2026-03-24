@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Anemia AI</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+    margin: 0;
+    font-family: 'Segoe UI';
+    background: #0f172a;
+    color: white;
+}
+
+/* Phone container */
+.app {
+    max-width: 400px;
+    margin: auto;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: #111827;
+    border-radius: 25px;
+    overflow: hidden;
+}
+
+/* Header */
+.header {
+    padding: 15px;
+    text-align: center;
+    background: linear-gradient(45deg, #00c6ff, #0072ff);
+    font-weight: bold;
+}
+
+/* Content */
+.content {
+    padding: 15px;
+    overflow-y: scroll;
+}
+
+/* Card */
+.card {
+    background: #1f2937;
+    padding: 15px;
+    border-radius: 15px;
+    margin-bottom: 10px;
+}
+
+/* Button */
+button {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 25px;
+    background: linear-gradient(45deg, #00c6ff, #0072ff);
+    color: white;
+    font-size: 16px;
+}
+
+/* Loader */
+.loader {
+    display: none;
+    text-align: center;
+    margin-top: 10px;
+}
+
+.spinner {
+    border: 5px solid #333;
+    border-top: 5px solid #00c6ff;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+<div class="header">🩺 Anemia AI</div>
+
+<div class="content">
+
+<form method="POST" enctype="multipart/form-data" onsubmit="showLoader()">
+
+<div class="card">
+<h3>Upload Images</h3>
+<input type="file" name="images" multiple required>
+</div>
+
+<div class="card">
+<p>Do you feel tired?</p>
+<input type="radio" name="q1" value="yes"> Yes
+<input type="radio" name="q1" value="no"> No
+</div>
+
+<div class="card">
+<p>Dizziness?</p>
+<input type="radio" name="q2" value="yes"> Yes
+<input type="radio" name="q2" value="no"> No
+</div>
+
+<div class="card">
+<p>Pale skin?</p>
+<input type="radio" name="q3" value="yes"> Yes
+<input type="radio" name="q3" value="no"> No
+</div>
+
+<!-- Add remaining questions same way -->
+
+<button type="submit">🚀 Analyze</button>
+
+<div class="loader" id="loader">
+<div class="spinner"></div>
+<p>AI is analyzing your health...</p>
+</div>
+
+</form>
+
+</div>
+
+</div>
+
+<script>
+function showLoader() {
+    document.getElementById("loader").style.display = "block";
+}
+</script>
+
+</body>
+</html>

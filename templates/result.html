@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Result</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+    margin: 0;
+    font-family: 'Segoe UI';
+    background: #0f172a;
+    color: white;
+}
+
+.app {
+    max-width: 400px;
+    margin: auto;
+    background: #111827;
+    min-height: 100vh;
+}
+
+.header {
+    padding: 15px;
+    text-align: center;
+    background: linear-gradient(45deg, #00c6ff, #0072ff);
+}
+
+.card {
+    padding: 20px;
+    margin: 15px;
+    border-radius: 15px;
+    background: #1f2937;
+    text-align: center;
+}
+
+img {
+    width: 100%;
+    border-radius: 10px;
+    margin-bottom: 10px;
+}
+
+.high { background: #7f1d1d; }
+.medium { background: #78350f; }
+.low { background: #064e3b; }
+
+a {
+    color: #00c6ff;
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+<div class="header">🩺 Result</div>
+
+<div class="card">
+
+{% for img in images %}
+<img src="{{ img }}">
+{% endfor %}
+
+<div class="{% if 'High' in result.status %}high{% elif 'Moderate' in result.status %}medium{% else %}low{% endif %}">
+
+<h2>{{ result.status }}</h2>
+<p>{{ result.message }}</p>
+<p><b>Confidence:</b> {{ result.confidence }}%</p>
+<p>{{ result.advice }}</p>
+
+</div>
+
+<p>📊 Image Score: {{ img_score }}</p>
+<p>🧠 Symptoms Score: {{ q_score }}</p>
+
+<br>
+<a href="/">🔄 Try Again</a>
+
+</div>
+
+</div>
+
+</body>
+</html>
