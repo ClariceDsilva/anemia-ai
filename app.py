@@ -9,7 +9,7 @@ app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 # Load model
-model = YOLO("best.pt")
+model = YOLO("yolov8n.pt")
 
 # -------------------------------
 # IMAGE PREDICTION FUNCTION
