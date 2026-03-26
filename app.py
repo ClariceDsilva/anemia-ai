@@ -1,15 +1,23 @@
 from flask import Flask, render_template, request
 import os
 from ultralytics import YOLO
+import torch
+
+# Reduce CPU usage (important for Render free plan)
+torch.set_num_threads(1)
 
 app = Flask(__name__)
 
+# Upload folder
 UPLOAD_FOLDER = "static/uploads"
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-# Load model
-model = YOLO("yolov8n.pt")
+# -------------------------------
+# LOAD LIGHTWEIGHT MODEL
+# -------------------------------
+model = YOLO("yolov8n.pt")   # IMPORTANT: lightweight model
+
 
 # -------------------------------
 # IMAGE PREDICTION FUNCTION
@@ -19,21 +27,29 @@ def predict_images(image_paths):
     total = 0
 
     for path in image_paths:
-        results = model(path)
+        try:
+            results = model(path, imgsz=320)  # smaller size = less memory
 
-        for r in results:
-            for box in r.boxes:
-                cls_id = int(box.cls[0])
-                conf = float(box.conf[0])
-                class_name = model.names[cls_id]
+            for r in results:
+                if r.boxes is None:
+                    continue
 
-                total += 1
+                for box in r.boxes:
+                    cls_id = int(box.cls[0])
+                    conf = float(box.conf[0])
+                    class_name = model.names[cls_id]
 
-                if class_name == "pale nails":
-                    anemia_score += conf
+                    total += 1
 
-                elif class_name == "conjunctiva":
-                    anemia_score += (1 - conf)
+                    if class_name == "pale nails":
+                        anemia_score += conf
+
+                    elif class_name == "conjunctiva":
+                        anemia_score += (1 - conf)
+
+        except Exception as e:
+            print(f"Error processing image {path}: {e}")
+            continue
 
     if total == 0:
         return 0.5
@@ -67,24 +83,24 @@ def final_decision(img_score, q_score):
     if final_score > 0.7:
         return {
             "status": "⚠️ High Risk of Anemia",
-            "message": "You may have strong signs of anemia.",
-            "advice": "Please consult a doctor immediately.",
+            "message": "Strong signs of anemia detected.",
+            "advice": "Consult a doctor immediately. Increase iron-rich foods.",
             "confidence": int(final_score * 100)
         }
 
     elif final_score > 0.4:
         return {
             "status": "⚠️ Moderate Risk",
-            "message": "You may have mild signs of anemia.",
-            "advice": "Consider improving diet and consult doctor if needed.",
+            "message": "Some symptoms of anemia detected.",
+            "advice": "Improve diet (iron, vitamin B12) and monitor health.",
             "confidence": int(final_score * 100)
         }
 
     else:
         return {
             "status": "✅ Low Risk",
-            "message": "No major signs of anemia detected.",
-            "advice": "Maintain a healthy lifestyle and regular checkups.",
+            "message": "No major signs of anemia.",
+            "advice": "Keep maintaining a healthy lifestyle.",
             "confidence": int(final_score * 100)
         }
 
@@ -100,10 +116,14 @@ def index():
         image_paths = []
 
         for file in files:
-            if file.filename != "":
-                path = os.path.join(app.config["UPLOAD_FOLDER"], file.filename)
-                file.save(path)
-                image_paths.append(path)
+            if file and file.filename != "":
+                filepath = os.path.join(app.config["UPLOAD_FOLDER"], file.filename)
+                file.save(filepath)
+                image_paths.append(filepath)
+
+        # Avoid crash if no images
+        if len(image_paths) == 0:
+            return render_template("index.html", error="Please upload at least one image")
 
         img_score = predict_images(image_paths)
         q_score = calculate_question_score(request.form)
@@ -121,5 +141,9 @@ def index():
     return render_template("index.html")
 
 
+# -------------------------------
+# RUN APP (RENDER SAFE)
+# -------------------------------
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
